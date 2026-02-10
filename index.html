@@ -1,137 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carregando...</title>
-<meta name="theme-color" content="#000000">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Pagamento Seguro</title>
+  <meta name="theme-color" content="#000000"/>
 
-<style>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    html,body{width:100%;height:100%;background:#000;overflow:hidden}
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-}
+    /* IFRAME */
+    iframe{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+      background:#fff;
+      z-index:1;
+    }
 
-html,body{
-height:100%;
-background:#000;
-display:flex;
-align-items:center;
-justify-content:center;
-}
+    /* LOADER */
+    .loading{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:14px;
+      background:#000;
+      color:#fff;
+      z-index:5;
+    }
+    .spinner{
+      width:62px;height:62px;
+      border:6px solid rgba(255,255,255,.15);
+      border-top:6px solid #fff;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .loading b{font-size:16px}
+    .loading span{font-size:13px;opacity:.7;text-align:center;max-width:320px}
 
-/* LOADER */
-
-.loading-container{
-text-align:center;
-color:#fff;
-}
-
-.spinner{
-width:65px;
-height:65px;
-border:5px solid rgba(255,255,255,0.15);
-border-top:5px solid #ffffff;
-border-radius:50%;
-animation:spin 1s linear infinite;
-margin:auto;
-}
-
-@keyframes spin{
-to{transform:rotate(360deg);}
-}
-
-.loading-text{
-margin-top:20px;
-font-size:20px;
-font-weight:600;
-letter-spacing:0.4px;
-}
-
-.sub{
-margin-top:8px;
-font-size:14px;
-opacity:.7;
-}
-
-button{
-margin-top:30px;
-padding:16px 28px;
-border:none;
-border-radius:12px;
-font-size:16px;
-font-weight:700;
-cursor:pointer;
-background:#ffffff;
-color:#000;
-transition:.25s;
-display:none;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-</style>
+    /* FALLBACK (quando iframe é bloqueado) */
+    .fallback{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      background:#000;
+      color:#fff;
+      z-index:10;
+    }
+    .card{
+      width:min(520px, 100%);
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+      border-radius:18px;
+      padding:22px;
+      text-align:center;
+      backdrop-filter: blur(10px);
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:58px;height:58px;
+      border-radius:16px;
+      background:rgba(255,255,255,.12);
+      margin:0 auto 12px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    h1{font-size:20px;line-height:1.2;margin-bottom:10px}
+    p{font-size:14px;line-height:1.45;opacity:.85}
+    .btn{
+      width:100%;
+      margin-top:16px;
+      padding:16px 18px;
+      border:0;
+      border-radius:14px;
+      background:#fff;
+      color:#000;
+      font-size:16px;
+      font-weight:900;
+      cursor:pointer;
+      transition:transform .15s ease, opacity .15s ease;
+    }
+    .btn:hover{transform:scale(1.02)}
+    .btn:active{transform:scale(.99);opacity:.9}
+    .mini{margin-top:10px;font-size:12px;opacity:.6}
+  </style>
 </head>
 
 <body>
 
-<div class="loading-container">
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <b>Carregando…</b>
+    <span>Se o checkout não abrir aqui, vamos liberar um botão seguro pra abrir direto.</span>
+  </div>
 
-<div class="spinner"></div>
+  <!-- IMPORTANTE: GitHub Pages é HTTPS, então o checkout precisa ser HTTPS -->
+  <iframe
+    id="checkoutFrame"
+    src="https://checkout.perfectpay.com.br/pay/PPU38CQ6FE7"
+    allow="payment *; fullscreen"
+    referrerpolicy="no-referrer"
+  ></iframe>
 
-<div class="loading-text">
-Preparando seu acesso seguro...
-</div>
+  <div class="fallback" id="fallback">
+    <div class="card">
+      <div class="badge">PP</div>
+      <h1>Para continuar, abra o checkout seguro</h1>
+      <p>
+        Alguns navegadores/plataformas bloqueiam o checkout dentro da página por segurança.
+        Clique no botão abaixo para abrir o pagamento.
+      </p>
 
-<div class="sub">
-Você será redirecionado automaticamente
-</div>
+      <button class="btn" id="openBtn">ABRIR CHECKOUT</button>
+      <div class="mini">Se não abrir, desative bloqueador de pop-up e tente novamente.</div>
+    </div>
+  </div>
 
-<button onclick="goCheckout()">
-Ir para o pagamento
-</button>
+  <script>
+    const CHECKOUT_URL = "https://checkout.perfectpay.com.br/pay/PPU38CQ6FE7";
 
-</div>
+    const frame = document.getElementById("checkoutFrame");
+    const loading = document.getElementById("loading");
+    const fallback = document.getElementById("fallback");
+    const openBtn = document.getElementById("openBtn");
 
+    // Some o loader quando o iframe "carrega"
+    frame.addEventListener("load", () => {
+      loading.style.display = "none";
+    });
 
-<script>
+    // Se em alguns segundos o usuário ainda estiver vendo tela vazia/erro (muito comum por bloqueio),
+    // mostramos o fallback com botão. (Sem redirecionamento automático.)
+    setTimeout(() => {
+      loading.style.display = "none";
+      fallback.style.display = "flex";
+    }, 4500);
 
-// 🔥 COLE AQUI SUA URL DA PERFECTPAY
-const CHECKOUT_URL = "https://checkout.perfectpay.com.br/pay/PPU38CQ6FE7";
+    // Abre com clique (mais seguro contra bloqueios)
+    openBtn.addEventListener("click", () => {
+      // tenta nova aba primeiro
+      const w = window.open(CHECKOUT_URL, "_blank", "noopener,noreferrer");
+      // se pop-up for bloqueado, abre na mesma aba
+      if (!w) window.location.href = CHECKOUT_URL;
+    });
+  </script>
 
-// tempo antes do redirect (ms)
-const REDIRECT_TIME = 1800;
-
-// botão aparece se algo bloquear o redirect
-const SHOW_BUTTON_TIME = 3500;
-
-
-function goCheckout(){
-window.location.href = CHECKOUT_URL;
-}
-
-
-// redirect automático
-setTimeout(() => {
-
-window.location.href = CHECKOUT_URL;
-
-}, REDIRECT_TIME);
-
-
-// fallback — mostra botão caso navegador bloqueie
-setTimeout(() => {
-
-document.querySelector("button").style.display = "inline-block";
-
-}, SHOW_BUTTON_TIME);
-
-</script>
+  <noscript>
+    <div style="position:fixed;inset:0;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;">
+      Ative o JavaScript para abrir o checkout. Ou acesse:
+      https://checkout.perfectpay.com.br/pay/PPU38CQ6FE7
+    </div>
+  </noscript>
 
 </body>
 </html>
