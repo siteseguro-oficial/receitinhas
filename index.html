@@ -1,130 +1,105 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Receitinha do Dia</title>
+  <meta name="theme-color" content="#000000"/>
 
-<title>Receitinha do Dia</title>
+  <style>
+    :root { color-scheme: light dark; }
 
-<meta name="theme-color" content="#000000"/>
+    *{
+      box-sizing:border-box;
+      margin:0;
+      padding:0;
+    }
 
-<style>
+    html,body{
+      width:100%;
+      height:100%;
+      background:#000;
+      overflow:hidden;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+    }
 
-:root { color-scheme: light dark; }
+    /* LOADER */
+    .loading{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#000;
+      color:#fff;
+      gap:12px;
+      z-index:10;
+    }
 
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:999px;
+      background:#fff;
+      animation:bounce 1s infinite ease-in-out;
+    }
 
-html,body{
-width:100%;
-height:100%;
-background:#000;
-overflow:hidden;
-font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-}
+    .dot:nth-child(2){animation-delay:.15s;opacity:.6;}
+    .dot:nth-child(3){animation-delay:.3s;opacity:.4;}
 
-/* LOADER */
+    @keyframes bounce{
+      0%,80%,100%{transform:translateY(0);}
+      40%{transform:translateY(-8px);}
+    }
 
-.loading{
-position:fixed;
-inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#000;
-color:#fff;
-gap:12px;
-z-index:10;
-}
-
-.dot{
-width:10px;
-height:10px;
-border-radius:999px;
-background:#fff;
-animation:bounce 1s infinite ease-in-out;
-}
-
-.dot:nth-child(2){animation-delay:.15s;opacity:.6;}
-.dot:nth-child(3){animation-delay:.3s;opacity:.4;}
-
-@keyframes bounce{
-0%,80%,100%{transform:translateY(0);}
-40%{transform:translateY(-8px);}
-}
-
-/* IFRAME */
-
-iframe{
-position:fixed;
-inset:0;
-width:100%;
-height:100%;
-border:0;
-}
-
-/* FALLBACK */
-
-.fallback{
-position:fixed;
-inset:0;
-display:none;
-padding:24px;
-background:#000;
-color:#fff;
-align-items:center;
-justify-content:center;
-text-align:center;
-z-index:20;
-}
-
-</style>
+    /* IFRAME */
+    iframe{
+      position:fixed;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:0;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="loading" id="loading">
-<div class="dot"></div>
-<div class="dot"></div>
-<div class="dot"></div>
-<div style="font-weight:700;">Carregando…</div>
-</div>
+  <div class="loading" id="loading">
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div style="font-weight:700;">Carregando…</div>
+  </div>
 
-<iframe
-id="appFrame"
-src="https://receitinha-do-dia.lovable.app/"
-allow="fullscreen">
-</iframe>
+  <!-- CHECKOUT PERFEITO PAY -->
+  <iframe
+    id="appFrame"
+    src="https://checkout.perfectpay.com.br/pay/PPU38CQ6FE7?"
+    allow="fullscreen">
+  </iframe>
 
-<script>
+  <script>
+    (function(){
+      const frame = document.getElementById("appFrame");
+      const loading = document.getElementById("loading");
 
-(function(){
+      let loaded = false;
 
-const frame=document.getElementById("appFrame");
-const loading=document.getElementById("loading");
+      function hideLoader(){
+        if(loaded) return;
+        loaded = true;
+        loading.style.display = "none";
+      }
 
-let loaded=false;
+      frame.addEventListener("load", hideLoader);
 
-function hideLoader(){
-if(loaded)return;
-loaded=true;
-loading.style.display="none";
-}
-
-frame.addEventListener("load",hideLoader);
-
-setTimeout(()=>{
-if(!loaded){
-loading.style.display="none";
-}
-},5000);
-
-})();
-
-</script>
+      // fallback: some mesmo se o iframe demorar/bloquear o evento load
+      setTimeout(() => {
+        if(!loaded) loading.style.display = "none";
+      }, 5000);
+    })();
+  </script>
 
 </body>
 </html>
